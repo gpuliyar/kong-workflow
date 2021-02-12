@@ -37,3 +37,5 @@ jobs:
           tar -xf deck.tar.gz -C /tmp
           sudo cp /tmp/deck /usr/local/bin/
           deck validate
+      - name: decK Sync
+        run: deck sync
