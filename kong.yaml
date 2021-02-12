@@ -8,3 +8,8 @@
    - name: mocking
      paths:
      - /mock
+ plugins:
+ - name: rate-limiting
+   config:
+     minute: 5
+     policy: local
