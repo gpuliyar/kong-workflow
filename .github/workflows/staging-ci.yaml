@@ -1,0 +1,31 @@
+name: Release
+
+on:
+  pull_request
+
+jobs:
+  release:
+    strategy:
+      matrix:
+        go_version: [1.15.x]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Set up Go 1.15
+        uses: actions/setup-go@v1
+        with:
+          go-version: ${{ matrix.go_version }}
+      - name: Build with xgo
+        uses: crazy-max/ghaction-xgo@v1
+        with:
+          xgo_version: latest
+          go_version: ${{ matrix.go_version }}
+          dest: build
+          prefix: autocannon-go
+          targets: linux/amd64
+          v: true
+          x: false
+          ldflags: -s -w
+      - name: Run Template
+        run: main --staging
