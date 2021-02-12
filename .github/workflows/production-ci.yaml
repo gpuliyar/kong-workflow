@@ -39,3 +39,8 @@ jobs:
           deck validate
       - name: decK Sync
         run: deck sync
+      - name: Run Cypress testing
+        run: |
+          npm init
+          npm i cypress
+          npm run cypress:open
