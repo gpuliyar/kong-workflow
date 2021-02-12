@@ -1,9 +1,9 @@
  _format_version: "1.1"
  services:
- - host: mockbin.org
+ - host: {{ .Service.Example.Host }}
    name: example_service
-   port: 80
-   protocol: http
+   port: {{ .Service.Example.Port }}
+   protocol: {{ .Service.Example.Protocol }}
    routes:
    - name: mocking
      paths:
@@ -11,11 +11,11 @@
  plugins:
  - name: rate-limiting
    config:
-     minute: 5
+     minute: {{ .Service.Example.Plugin.RateLimiting.Minute }}
      policy: local
  - name: proxy-cache
    config:
      content_type:
      - "application/json; charset=utf-8"
-     cache_ttl: 30
+     cache_ttl: {{ .Service.Example.Plugin.ProxyCache.CacheTtl }}
      strategy: memory
