@@ -4,3 +4,7 @@
    name: example_service
    port: 80
    protocol: http
+   routes:
+   - name: mocking
+     paths:
+     - /mock
