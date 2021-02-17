@@ -91,6 +91,9 @@ func (conf *Config) fetchJwt(conn redis.Conn, kong *pdk.PDK) {
 	if jwt, err := redis.String(conn.Do("HGET", conf.ClientID, "jwt")); err != nil {
 		kong.Log.Err("jwt cache fetch failed", err)
 		conf.Jwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImV4cCI6MTkwMDAwMDAwMCwiaXNzIjoiZW52b3kiLCJzdWIiOiJlbnZveSIsImF1ZCI6InZlbmRvcnMifQ.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.lPpSEDd6aDLJPO6UpL4C-cunqWkZxOTJR30etdyHLD0"
+		if _, err := conn.Do("HMSET", conf.ClientID, "jwt", jwt); err != nil {
+			kong.Log.Err("unable to cache jwt", err)
+		}
 	} else {
 		conf.Jwt = jwt
 	}
