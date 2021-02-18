@@ -1,5 +1,5 @@
 ## Stage 1 - Build Plugins
-FROM golang:1.16-alpine as builder
+FROM golang:alpine as builder
 
 RUN mkdir /plugins
 
@@ -19,7 +19,7 @@ COPY go.mod go.sum client-auth.go ./
 RUN go build -buildmode plugin -o client-auth.so client-auth.go
 
 ## Stage 2 - Bundle Kong with Plugings
-FROM kong:latest
+FROM kong:2.2.1-alpine
 
 COPY --from=builder /usr/local/bin/go-pluginserver /usr/local/bin/go-pluginserver
 
