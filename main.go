@@ -7,9 +7,9 @@ import (
 )
 
 type Service struct {
-    Name   string
-    RateLimit int64
-    CacheTtl int64
+	Name      string
+	RateLimit int64
+	CacheTtl  int64
 }
 
 func main() {
@@ -18,9 +18,9 @@ func main() {
 		log.Fatalln(err)
 	}
 
-    // build Service struct by looking up the environment variables
+	// build Service struct by looking up the environment variables
 
-	err = tpl.Execute(os.Stdout, user)
+	err = tpl.Execute(os.Stdout, nil)
 	if err != nil {
 		panic(err)
 	}
