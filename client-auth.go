@@ -42,7 +42,6 @@ func (conf *Config) Access(kong *pdk.PDK) {
 	defer dbConn.Close()
 	if err != nil {
 		kong.Log.Err("unable to connect db", err.Error())
-		kong.Response.SetStatus(401)
 		kong.Response.Exit(500, `{"message": "db connection failed", "status": "failed"}`, responseHeaders)
 		return
 	}
@@ -51,7 +50,6 @@ func (conf *Config) Access(kong *pdk.PDK) {
 	defer redisConn.Close()
 	if err != nil {
 		kong.Log.Err("unable to connect redis", err.Error())
-		kong.Response.SetStatus(401)
 		kong.Response.Exit(500, `{"message": "redis connection failed", "status": "failed"}`, responseHeaders)
 		return
 	}
@@ -59,25 +57,20 @@ func (conf *Config) Access(kong *pdk.PDK) {
 	xClientID, err := kong.Request.GetHeader("X-Client-ID")
 	if err != nil {
 		kong.Log.Err("auth header - x-client-id - not found", err.Error())
-		kong.Response.SetStatus(401)
-		kong.Response.Exit(500, `{"message": "x-client-id header not found", "status": "failed"}`, responseHeaders)
+		kong.Response.Exit(403, `{"message": "x-client-id header not found", "status": "failed"}`, responseHeaders)
 		return
 	}
 
 	xClientToken, err := kong.Request.GetHeader("X-Client-Token")
 	if err != nil {
 		kong.Log.Err("auth header - x-client-token - not found", err.Error())
-		kong.Response.SetStatus(401)
-		kong.Response.Exit(500, `{"message": "x-client-token header not found", "status": "failed"}`, responseHeaders)
+		kong.Response.Exit(403, `{"message": "x-client-token header not found", "status": "failed"}`, responseHeaders)
 		return
 	}
 
 	conf.ClientID = xClientID
 	conf.ClientToken = xClientToken
 	if err = conf.validate(dbConn, kong); err != nil {
-		kong.Log.Err("x-client-id and x-client-token validation failed", err.Error())
-		kong.Response.SetStatus(401)
-		kong.Response.Exit(500, `{"message": "client validation failed", "status": "failed"}`, responseHeaders)
 		return
 	}
 
@@ -100,6 +93,9 @@ func (conf *Config) fetchJwt(conn redis.Conn, kong *pdk.PDK) {
 }
 
 func (conf *Config) validate(conn *sql.DB, kong *pdk.PDK) error {
+	responseHeaders := make(map[string][]string)
+	responseHeaders["Content-Type"] = append(responseHeaders["Content-Type"], "application/json")
+
 	sqlSelect := "select client_token from vendors where client_id = $1"
 	row := conn.QueryRow(sqlSelect, conf.ClientID)
 
@@ -107,17 +103,20 @@ func (conf *Config) validate(conn *sql.DB, kong *pdk.PDK) error {
 
 	switch err := row.Scan(&dbClientToken); err {
 	case sql.ErrNoRows:
-		kong.Log.Err("unable to find client id", err.Error())
+		kong.Log.Err("x-client-id and x-client-token validation failed", err.Error())
+		kong.Response.Exit(403, `{"message": "client id not found", "status": "failed"}`, responseHeaders)
 		return err
 	case nil:
 		kong.Log.Info("client id exists in db")
 	default:
-		kong.Log.Err("error : %x", err.Error())
+		kong.Log.Err("generic error caught : %x", err.Error())
+		kong.Response.Exit(500, `{"message": "issue in identifying client info", "status": "failed"}`, responseHeaders)
 		return err
 	}
 
 	if dbClientToken != conf.ClientToken {
 		kong.Log.Err("client token doesn't match db record")
+		kong.Response.Exit(403, `{"message": "client id and token doesnt match our records", "status": "failed"}`, responseHeaders)
 		return errors.New("client token doesn't match db record")
 	} else {
 		kong.Log.Info("client id and token matched successfully")
