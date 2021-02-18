@@ -12,14 +12,14 @@ import (
 )
 
 const (
-	dbHost     = "localhost"
+	dbHost     = "db"
 	dbPort     = 5432
-	dbUser     = "postgres"
-	dbPassword = "postgres"
-	dbName     = "postgres"
+	dbUser     = "kong"
+	dbPassword = "kong"
+	dbName     = "kong"
 	dbDriver   = "postgres"
 
-	redisHost    = "localhost"
+	redisHost    = "redis"
 	redisPort    = 6379
 	redisNetwork = "tcp"
 )

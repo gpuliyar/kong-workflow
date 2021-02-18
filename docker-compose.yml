@@ -112,6 +112,11 @@ services:
     volumes:
       - kong_data:/var/lib/postgresql/data
 
+  redis:
+    image: redis
+    networks:
+      - kong-net
+
 secrets:
   kong_postgres_password:
     file: ./POSTGRES_PASSWORD
