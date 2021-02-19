@@ -9,5 +9,12 @@
      paths:
      - /mock
      strip_path: true
+ - url: https://jqjviy2j2a.execute-api.us-east-1.amazonaws.com/default/kong-test-function-1
+   name: aws-test
+   routes:
+   - name: lcl-mocking
+     paths:
+     - /lcl
+     strip_path: true
  plugins:
  - name: client-auth
